@@ -53,8 +53,8 @@ export default function BookingWidget({ place }) {
           Price: ${place.price} per night
         </div>
         <div className="border rounded-2xl mt-4">
-          <div className="flex">
-            <div className="py-3 px-4">
+          <div className="flex checkIn overflow-hidden">
+            <div className="py-3 px-4 pr-0">
               <label>Check in: </label>
               <input
                 type="date"
@@ -100,9 +100,23 @@ export default function BookingWidget({ place }) {
           )}
         </div>
 
-        <button onClick={bookPlace} className="primary mt-4">
-          Book this place
-          {numberofNights > 0 && <span> ${numberofNights * place.price}</span>}
+        <button
+          onClick={bookPlace}
+          className={`primary mt-4 ${!user ? "opacity-50" : ""}`}
+          disabled={!user}
+        >
+          {!user ? (
+            <span className="text-sm">Login to book this place</span>
+          ) : (
+            <>
+              Book this place
+              {numberofNights > 0 && (
+                <span> ${numberofNights * place.price}</span>
+              )}
+            </>
+          )}
+          {/* Book this place
+          {numberofNights > 0 && <span> ${numberofNights * place.price}</span>} */}
         </button>
       </div>
     </>

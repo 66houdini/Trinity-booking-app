@@ -8,9 +8,10 @@ export default function PlaceGallery({ place }) {
   if (showPhotos) {
     return (
       <div className="absolute inset-0 bg-black text-white  min-h-screen">
-        <div className="bg-black p-8 grid gap-4">
+        <div className="bg-black p-8 grid gap-4 justify-items-center">
           <div>
-            <h2 className="text-2xl mr-48">Photos of {place.title}</h2>
+            <h2 className="text-2xl ">Photos of {place.title}</h2>
+            {/* mr-48 */}
             <button
               onClick={() => setShowPhotos(false)}
               className="fixed right-12 top-8 flex shadow shadow-black bg-white text-black gap-1 py-2 px-4 rounded-2xl"
@@ -32,9 +33,9 @@ export default function PlaceGallery({ place }) {
           </div>
           {place?.photos?.length > 0 &&
             place.photos.map((photos) => (
-              <div key={photos}>
+              <div key={photos} className="">
                 <img
-                  className=""
+                  className="aspect-square object-cover"
                   src={`http://localhost:4000/uploads/${photos}`}
                 />
               </div>
