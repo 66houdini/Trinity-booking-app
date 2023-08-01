@@ -1,4 +1,7 @@
 /* eslint-disable no-unused-vars */
+
+import Image from "./Image";
+
 /* eslint-disable react/prop-types */
 export default function PlaceImg({ place, index = 0, className = null }) {
   if (!place.photos?.length) {
@@ -9,9 +12,9 @@ export default function PlaceImg({ place, index = 0, className = null }) {
   }
   return (
     <>
-      <img
+      <Image
         className={className}
-        src={"http://localhost:4000/uploads/" + place.photos[index]}
+        src={place.photos[index]}
         alt=""
       />
     </>

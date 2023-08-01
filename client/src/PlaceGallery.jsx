@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Image from "./Image";
 
 /* eslint-disable react/prop-types */
 
@@ -34,9 +35,9 @@ export default function PlaceGallery({ place }) {
           {place?.photos?.length > 0 &&
             place.photos.map((photos) => (
               <div key={photos} className="">
-                <img
+                <Image
                   className="aspect-square object-cover"
-                  src={`http://localhost:4000/uploads/${photos}`}
+                  src={photos}
                 />
               </div>
             ))}
@@ -52,29 +53,29 @@ export default function PlaceGallery({ place }) {
           <div>
             {place.photos?.[0] && (
               <div>
-                <img
+                <Image
                   onClick={() => setShowPhotos(true)}
                   className="aspect-square object-cover cursor-pointer"
-                  src={`http://localhost:4000/uploads/${place.photos[0]}`}
+                  src={place.photos[0]}
                 />
               </div>
             )}
           </div>
           <div className="grid">
             {place.photos?.[1] && (
-              <img
+              <Image
                 onClick={() => setShowPhotos(true)}
                 className="aspect-square object-cover cursor-pointer"
-                src={`http://localhost:4000/uploads/${place.photos[1]}`}
+                src={place.photos[1]}
               />
             )}
             <div className="overflow-hidden">
               {/* overflow hidden trims the image */}
               {place.photos?.[2] && (
-                <img
+                <Image
                   onClick={() => setShowPhotos(true)}
                   className=" aspect-square object-cover relative top-2 cursor-pointer"
-                  src={`http://localhost:4000/uploads/${place.photos[2]}`}
+                  src={place.photos[2]}
                 />
               )}
             </div>

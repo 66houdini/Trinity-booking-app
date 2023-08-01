@@ -2,6 +2,7 @@
 /* eslint-disable react/prop-types */
 import axios from "axios";
 import { useState } from "react";
+import Image from "./Image";
 
 export default function PhotosUploader({ addedPhotos, onChange }) {
   const [photoLink, setPhotoLink] = useState("");
@@ -68,9 +69,9 @@ export default function PhotosUploader({ addedPhotos, onChange }) {
         {addedPhotos.length > 0 &&
           addedPhotos.map((link) => (
             <div key={link} className="h-32 flex relative">
-              <img
+              <Image
                 className="rounded-2xl w-full object-cover"
-                src={`http://localhost:4000/uploads/${link}`}
+                src={link}
               />
               <button
                 onClick={(ev) => removePhoto(ev, link)}

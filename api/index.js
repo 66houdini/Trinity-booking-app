@@ -5,13 +5,15 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const imageDownloader = require("image-downloader");
 const { default: mongoose } = require("mongoose");
-const multer = require("multer");
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+const multer = require("multer"); //to upload filed to local storage
 const fs = require("fs");
 require("dotenv").config();
 const User = require("./models/User");
 const Place = require("./models/Place");
 const Booking = require("./models/Booking");
 const cookieParser = require("cookie-parser");
+const mime = require("mime-types");
 app.use(express.json());
 app.use(cookieParser());
 app.use(
@@ -24,7 +26,31 @@ app.use("/uploads", express.static(__dirname + "/uploads"));
 
 const bcryptSalt = bcrypt.genSaltSync(10);
 const jswtSecret = "dcdfvddfvknjjsdj";
-mongoose.connect(process.env.MONGO_URL);
+const bucket = "trinity-booking-app";
+
+// npm i @aws-sdk/client-s3
+async function uploadToS3(path, originalFilename, mimetype) {
+  const client = new S3Client({
+    region: "us-east-1",
+    credentials: {
+      accessKeyId: process.env.S3_ACCESS_KEY,
+      secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
+    },
+  });
+  const parts = originalFilename.split(".");
+  const ext = parts[parts.length - 1];
+  const newFilename = Date.now() + "." + ext;
+  const data = await client.send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Body: fs.readFileSync(path),
+      Key: newFilename,
+      ContentType: mimetype,
+      ACL: "public-read",
+    })
+  );
+  return `https://${bucket}.s3.amazonaws.com/${newFilename}`;
+}
 
 function getUSerDataFromReq(req) {
   return new Promise((resolve, reject) => {
@@ -36,10 +62,13 @@ function getUSerDataFromReq(req) {
 }
 
 app.get("/test", (req, res) => {
+  mongoose.connect(process.env.MONGO_URL);
   res.json("good to go");
 });
 
 app.post("/register", async (req, res) => {
+  mongoose.connect(process.env.MONGO_URL);
+
   const { name, email, password } = req.body;
 
   try {
@@ -55,6 +84,8 @@ app.post("/register", async (req, res) => {
 });
 
 app.post("/login", async (req, res) => {
+  mongoose.connect(process.env.MONGO_URL);
+
   const { email, password } = req.body;
   const userDoc = await User.findOne({ email });
   if (userDoc) {
@@ -79,6 +110,8 @@ app.post("/login", async (req, res) => {
 });
 
 app.get("/profile", (req, res) => {
+  mongoose.connect(process.env.MONGO_URL);
+
   //to get the cookie
   const { token } = req.cookies;
   if (token) {
@@ -104,26 +137,33 @@ app.post("/upload-by-link", async (req, res) => {
   const newName = "photo" + Date.now() + ".jpg";
   await imageDownloader.image({
     url: link,
-    dest: __dirname + "/uploads/" + newName,
+    dest: "/tmp/" + newName,
   });
-  res.json(newName);
+
+  const url = await uploadToS3(
+    "/tmp/" + newName,
+    newName,
+    mime.lookup("/tmp/" + newName)
+  );
+  res.json(url);
 });
 
-const photosMiddleware = multer({ dest: "uploads" });
-app.post("/upload", photosMiddleware.array("photos", 100), (req, res) => {
+const photosMiddleware = multer({ dest: "/tmp" });
+app.post("/upload", photosMiddleware.array("photos", 100), async (req, res) => {
+  mongoose.connect(process.env.MONGO_URL);
+
   const uploadedFiles = [];
   for (let i = 0; i < req.files.length; i++) {
-    const { path, originalname } = req.files[i];
-    const parts = originalname.split(".");
-    const ext = parts[parts.length - 1];
-    const newPath = path + "." + ext;
-    fs.renameSync(path, newPath);
-    uploadedFiles.push(newPath.replace("uploads", ""));
+    const { path, originalname, mimetype } = req.files[i];
+    const url = await uploadToS3(path, originalname, mimetype);
+    uploadedFiles.push(url);
   }
   res.json(uploadedFiles);
 });
 
 app.post("/places", async (req, res) => {
+  mongoose.connect(process.env.MONGO_URL);
+
   const { token } = req.cookies;
   const {
     title,
@@ -157,6 +197,8 @@ app.post("/places", async (req, res) => {
 });
 
 app.get("/user-places", (req, res) => {
+  mongoose.connect(process.env.MONGO_URL);
+
   // to grab the user id
   const { token } = req.cookies;
   jwt.verify(token, jswtSecret, {}, async (err, userData) => {
@@ -166,11 +208,15 @@ app.get("/user-places", (req, res) => {
 });
 
 app.get("/places/:id", async (req, res) => {
+  mongoose.connect(process.env.MONGO_URL);
+
   const { id } = req.params;
   res.json(await Place.findById(id));
 });
 
 app.put("/places", async (req, res) => {
+  mongoose.connect(process.env.MONGO_URL);
+
   const { token } = req.cookies;
   const {
     id,
@@ -209,10 +255,14 @@ app.put("/places", async (req, res) => {
 });
 
 app.get("/places", async (req, res) => {
+  mongoose.connect(process.env.MONGO_URL);
+
   res.json(await Place.find());
 });
 
 app.post("/bookings", async (req, res) => {
+  mongoose.connect(process.env.MONGO_URL);
+
   const userData = await getUSerDataFromReq(req);
   const { place, checkIn, checkOut, numberOfGuests, name, phone, price } =
     req.body;
@@ -235,8 +285,10 @@ app.post("/bookings", async (req, res) => {
 });
 
 app.get("/bookings", async (req, res) => {
+  mongoose.connect(process.env.MONGO_URL);
+
   const userData = await getUSerDataFromReq(req);
-  res.json(await Booking.find({user: userData.id}).populate("place"));
+  res.json(await Booking.find({ user: userData.id }).populate("place"));
 });
 
 app.listen(4000);
