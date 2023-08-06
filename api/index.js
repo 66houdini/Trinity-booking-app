@@ -14,7 +14,7 @@ const Place = require("./models/Place");
 const Booking = require("./models/Booking");
 const cookieParser = require("cookie-parser");
 const mime = require("mime-types");
-const allowedOrigins = ["http://localhost:5173", "https://trinity-booking-app.vercel.app"];
+const allowedOrigins = ["http://localhost:5173", "https://trinity-homes.vercel.app"];
 app.use(express.json());
 app.use(cookieParser());
 app.use(
