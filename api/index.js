@@ -14,12 +14,13 @@ const Place = require("./models/Place");
 const Booking = require("./models/Booking");
 const cookieParser = require("cookie-parser");
 const mime = require("mime-types");
+const allowedOrigins = ["http://localhost:5173", "https://trinity-booking-app.vercel.app"];
 app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
     credentials: true,
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
   })
 );
 app.use("/uploads", express.static(__dirname + "/uploads"));
