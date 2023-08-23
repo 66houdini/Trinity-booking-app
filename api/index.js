@@ -14,13 +14,12 @@ const Place = require("./models/Place");
 const Booking = require("./models/Booking");
 const cookieParser = require("cookie-parser");
 const mime = require("mime-types");
-const allowedOrigins = ["http://localhost:5173", "https://trinity-homes.vercel.app"];
 app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
     credentials: true,
-    origin: allowedOrigins,
+    origin: "http://localhost:5173",
   })
 );
 app.use("/uploads", express.static(__dirname + "/uploads"));
@@ -41,7 +40,7 @@ async function uploadToS3(path, originalFilename, mimetype) {
   const parts = originalFilename.split(".");
   const ext = parts[parts.length - 1];
   const newFilename = Date.now() + "." + ext;
-  const data = await client.send(
+  await client.send(
     new PutObjectCommand({
       Bucket: bucket,
       Body: fs.readFileSync(path),
